@@ -13,9 +13,17 @@ import (
 )
 
 var byteUnits = []string{"B", "KB", "MB", "GB", "TB", "PB"}
+var urlStr, fURL string
+var DEBUG bool
 
 func main() {
-	urlStr := "https://www.facebook.com/AnimeFreeWatch/videos/vb.801962233235589/888053707959774/"
+	DEBUG = false
+	urlStr = "https://www.facebook.com/AnimeFreeWatch/videos/vb.801962233235589/888053707959774/"
+	if len(os.Args) != 4 {
+		fmt.Printf("Please use : %s %s [hd/sd] vdo_name.mp4\n", os.Args[0], urlStr)
+		os.Exit(0)
+	}
+	urlStr = os.Args[1]
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", urlStr, nil) // <-- URL-encoded payload
@@ -41,16 +49,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	SD := getSDURL(string(body))
-	HD := getHDURL(string(body))
-	fmt.Println("Download", SD, "and", HD)
-	out, err := os.Create("HD.mp4")
+
+	switch os.Args[2] {
+	case "hd":
+		fURL = getHDURL(string(body))
+	case "sd":
+		fURL = getSDURL(string(body))
+	}
+	//SD := getSDURL(string(body))
+	//HD := getHDURL(string(body))
+	out, err := os.Create(os.Args[3])
 	defer out.Close()
-	resp1, err := http.Get(HD)
+	resp1, err := http.Get(fURL)
 	defer resp1.Body.Close()
 	fmt.Println("Content-Lenght=", byteUnitStr(resp1.ContentLength))
-	//	n, err := io.Copy(out, resp1.Body)
-	//	fmt.Printf("Write %v bytes\n", n)
 	progressR := &ioprogress.Reader{
 		Reader:   resp1.Body,
 		Size:     resp1.ContentLength,
@@ -63,27 +75,39 @@ func main() {
 func getSDURL(b string) string {
 	sd := regexp.MustCompile("\"sd_src\":\"(.*?)\"")
 	sd_url := sd.FindString(b)
-	//	fmt.Printf("Cut from src:= %s\n", sd_url)
+	if DEBUG {
+		fmt.Printf("Cut from src:= %s\n", sd_url)
+	}
 
 	rep := regexp.MustCompile("\\\\")
 	sd_url1 := rep.ReplaceAllString(sd_url, "")
-	//	fmt.Printf("Trim \\ := %s\n", sd_url1)
+	if DEBUG {
+		fmt.Printf("Trim \\ := %s\n", sd_url1)
+	}
 
 	sd_url2 := strings.Split(sd_url1, "\"")
-	//	fmt.Printf("Get URL := %s\n", sd_url2[3])
+	if DEBUG {
+		fmt.Printf("Get URL := %s\n", sd_url2[3])
+	}
 	return sd_url2[3]
 }
 func getHDURL(b string) string {
 	hd := regexp.MustCompile("hd_src\":\"(.*?)\"")
 	hd_url := hd.FindString(b)
-	//	fmt.Printf("Cut from src:= %s\n", hd_url)
+	if DEBUG {
+		fmt.Printf("Cut from src:= %s\n", hd_url)
+	}
 
 	rep := regexp.MustCompile("\\\\")
 	hd_url1 := rep.ReplaceAllString(hd_url, "")
-	//	fmt.Printf("Trim \\ := %s\n", hd_url1)
+	if DEBUG {
+		fmt.Printf("Trim \\ := %s\n", hd_url1)
+	}
 
 	hd_url2 := strings.Split(hd_url1, "\"")
-	//	fmt.Printf("Get URL := %s\n", hd_url2[2])
+	if DEBUG {
+		fmt.Printf("Get URL := %s\n", hd_url2[2])
+	}
 	return hd_url2[2]
 }
 func byteUnitStr(n int64) string {
