@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/mitchellh/ioprogress"
+	//	"github.com/mitchellh/ioprogress"
+	"github.com/neverlock/ioprogress"
 	"io"
 	"io/ioutil"
 	"log"
@@ -67,6 +68,8 @@ func main() {
 		Reader:   resp1.Body,
 		Size:     resp1.ContentLength,
 		DrawFunc: ioprogress.DrawTerminalf(os.Stdout, ioprogress.DrawTextFormatBar(50)),
+		//DrawFunc: ioprogress.DrawTerminalf(os.Stdout, ioprogress.DrawTextFormatBytes),
+		//DrawFunc: ioprogress.DrawTerminal(os.Stdout),
 	}
 	io.Copy(out, progressR)
 
