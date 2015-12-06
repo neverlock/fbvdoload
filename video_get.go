@@ -44,7 +44,9 @@ func main() {
 		}()
 		panic(err)
 	}
-	fmt.Println(resp.Status)
+	if DEBUG {
+		fmt.Println(resp.Status)
+	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -63,7 +65,9 @@ func main() {
 	defer out.Close()
 	resp1, err := http.Get(fURL)
 	defer resp1.Body.Close()
-	fmt.Println("Content-Lenght=", byteUnitStr(resp1.ContentLength))
+	if DEBUG {
+		fmt.Println("Content-Lenght=", byteUnitStr(resp1.ContentLength))
+	}
 	progressR := &ioprogress.Reader{
 		Reader:   resp1.Body,
 		Size:     resp1.ContentLength,
