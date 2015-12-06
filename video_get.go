@@ -12,6 +12,8 @@ import (
 	"strings"
 )
 
+var byteUnits = []string{"B", "KB", "MB", "GB", "TB", "PB"}
+
 func main() {
 	urlStr := "https://www.facebook.com/AnimeFreeWatch/videos/vb.801962233235589/888053707959774/"
 
@@ -46,7 +48,7 @@ func main() {
 	defer out.Close()
 	resp1, err := http.Get(HD)
 	defer resp1.Body.Close()
-	fmt.Println("Content-Lenght=", resp1.ContentLength)
+	fmt.Println("Content-Lenght=", byteUnitStr(resp1.ContentLength))
 	//	n, err := io.Copy(out, resp1.Body)
 	//	fmt.Printf("Write %v bytes\n", n)
 	progressR := &ioprogress.Reader{
@@ -83,4 +85,18 @@ func getHDURL(b string) string {
 	hd_url2 := strings.Split(hd_url1, "\"")
 	//	fmt.Printf("Get URL := %s\n", hd_url2[2])
 	return hd_url2[2]
+}
+func byteUnitStr(n int64) string {
+	var unit string
+	size := float64(n)
+	for i := 1; i < len(byteUnits); i++ {
+		if size < 1000 {
+			unit = byteUnits[i-1]
+			break
+		}
+
+		size = size / 1000
+	}
+
+	return fmt.Sprintf("%.3g %s", size, unit)
 }
